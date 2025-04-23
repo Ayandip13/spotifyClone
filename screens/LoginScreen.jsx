@@ -6,12 +6,23 @@ import {
   Image,
   KeyboardAvoidingView,
   TextInput,
+  TouchableOpacity,
+  Pressable,
 } from "react-native";
 import React, { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const LoginScreen = () => {
-  const [secureText, setSecureText] = useState(false);
+  const [secureText, setSecureText] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const navigation = useNavigation();
+
+  const togglePasswordVisibility = () => {
+    setSecureText(!secureText);
+  };
 
   return (
     <SafeAreaView
@@ -50,7 +61,14 @@ const LoginScreen = () => {
             />
             <TextInput
               placeholderTextColor={"gray"}
-              style={{ color: "gray", marginVertical: 10, width: 300 }}
+              value={email}
+              onChangeText={(text) => setEmail(text)}
+              style={{
+                color: "gray",
+                marginVertical: 6,
+                width: 300,
+                fontSize: email ? 16 : 16,
+              }}
               placeholder="Enter your Email"
             />
           </View>
@@ -67,20 +85,77 @@ const LoginScreen = () => {
               borderRadius: 5,
             }}
           >
-            <MaterialIcons
-              style={{ marginLeft: 8 }}
-              name="lock"
-              size={24}
-              color="black"
-            />
+            <TouchableOpacity onPress={togglePasswordVisibility}>
+              <MaterialIcons
+                style={{ marginLeft: 8 }}
+                name={secureText ? "visibility-off" : "visibility"}
+                size={24}
+                color="black"
+              />
+            </TouchableOpacity>
             <TextInput
               placeholderTextColor={"gray"}
-              secureTextEntry={!secureText}
-              style={{ color: "gray", marginVertical: 10, width: 300 }}
+              value={password}
+              onChangeText={(text) => setPassword(text)}
+              secureTextEntry={secureText}
+              style={{
+                color: "gray",
+                marginVertical: 6,
+                width: 300,
+                fontSize: password ? 16 : 16,
+              }}
               placeholder="Enter your Password"
             />
           </View>
         </View>
+
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 15,
+          }}
+        >
+          <Text>Keep me logged in</Text>
+          <Text style={{ fontWeight: 500, color: "#007FFF" }}>
+            Forgot Password
+          </Text>
+        </View>
+
+        <View style={{ marginTop: 45 }} />
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={{
+            width: 200,
+            backgroundColor: "#000",
+            padding: 15,
+            marginTop: 40,
+            marginLeft: "auto",
+            marginRight: "auto",
+            borderRadius: 6,
+          }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              color: "#fff",
+              fontSize: 17,
+              fontWeight: "bold",
+            }}
+          >
+            Login
+          </Text>
+        </TouchableOpacity>
+
+        <Pressable
+          style={{ marginTop: 10 }}
+          onPress={() => navigation.navigate("Register")}
+        >
+          <Text style={{ textAlign: "center", fontSize: 16 }}>
+            Don't have an account? Sign up
+          </Text>
+        </Pressable>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
