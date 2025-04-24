@@ -8,16 +8,45 @@ import {
   TextInput,
   TouchableOpacity,
   Pressable,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 
 const RegisterScreen = () => {
   const [secureText, setSecureText] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+
+  const handleRegister = () => {
+    const user = {
+      name: name,
+      email: email,
+      password: password,
+    };
+    axios
+      .post("http://192.168.0.102:3000/register", user)
+      .then((resp) => {
+        // console.log(resp);
+        Alert.alert(
+          "Registration successfull",
+          "You have been registered successfully"
+        );
+        setName("");
+        setEmail("");
+        setPassword("");
+      })
+      .catch((error) => {
+        Alert.alert(
+          "Registration failed",
+          "An error have occured during registration"
+        );
+        console.log("Error", error);
+      });
+  };
 
   const navigation = useNavigation();
 
@@ -66,7 +95,6 @@ const RegisterScreen = () => {
               placeholderTextColor={"gray"}
               value={name}
               onChangeText={(text) => setName(text)}
-              secureTextEntry={secureText}
               style={{
                 color: "gray",
                 marginVertical: 6,
@@ -147,6 +175,7 @@ const RegisterScreen = () => {
 
         <View style={{ marginTop: 45 }} />
         <TouchableOpacity
+          onPress={handleRegister}
           activeOpacity={0.8}
           style={{
             width: 200,
@@ -171,7 +200,7 @@ const RegisterScreen = () => {
         </TouchableOpacity>
 
         <Pressable
-          style={{ marginTop: 10 }}
+          style={{ marginTop: 25 }}
           onPress={() => navigation.goBack()}
         >
           <Text style={{ textAlign: "center", fontSize: 16 }}>

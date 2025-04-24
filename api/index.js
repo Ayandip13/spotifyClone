@@ -58,7 +58,7 @@ app.post("/register", async (req, res) => {
     newUser.verificationToken = crypto.randomBytes(20).toString("hex");
 
     //save the user to the database
-    new newUser.save();
+    await newUser.save();
 
     //send the verification email to the user
     sendverificationEmail(newUser.email, newUser.verificationToken);
@@ -110,7 +110,7 @@ app.get("/verify/:token", async (req, res) => {
       return res.status(404).json({ message: "Invalid Token" });
     }
 
-    user.veified = true; //cause the `verified` was false in default case and we'll marked as true after user click on that link
+    user.verified = true; //cause the `verified` was false in default case and we'll marked as true after user click on that link
     user.verificationToken = undefined; //because we don't  need that anymore
     await user.save();
 
@@ -118,5 +118,42 @@ app.get("/verify/:token", async (req, res) => {
   } catch (error) {
     console.log("Error getting the token", error);
     res.status(500).json({ message: "Email verification failed" });
+  }
+});
+
+const generateSecretKey = () => {
+  const secretKey = crypto.randomBytes(32).toString("hex");
+  return secretKey;
+};
+
+const secretKey = generateSecretKey();
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // check password
+    if (user.password !== password) {
+      return res.status(401).json({ message: "Invalid password" });
+    }
+
+    // optional: check if user is verified
+    if (!user.verified) {
+      return res
+        .status(403)
+        .json({ message: "Please verify your email first" });
+    }
+
+    const token = jwt.sign({ userId: user._id }, secretKey);
+    res.status(200).json({ token });
+  } catch (error) {
+    console.log("Login error:", error);
+    res.status(500).json({ message: "Login failed" });
   }
 });
