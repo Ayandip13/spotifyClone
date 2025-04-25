@@ -8,10 +8,13 @@ import {
   TextInput,
   TouchableOpacity,
   Pressable,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen = () => {
   const [secureText, setSecureText] = useState(true);
@@ -19,6 +22,21 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
 
   const navigation = useNavigation();
+
+  const handleLogin = async () => {
+    try {
+      const user = { email, password };
+
+      const res = await axios.post("http://192.168.0.102:3000/login", user);
+      const token = res.data.token;
+
+      await AsyncStorage.setItem("authToken", token);
+      // navigation.navigate("Home");
+    } catch (error) {
+      Alert.alert("Login failed", "Please check your email and password.");
+      console.log("Login error:", error);
+    }
+  };
 
   const togglePasswordVisibility = () => {
     setSecureText(!secureText);
@@ -36,12 +54,14 @@ const LoginScreen = () => {
           }}
         />
       </View>
+
       <KeyboardAvoidingView>
         <View style={{ alignItems: "center", justifyContent: "center" }}>
           <Text style={{ fontSize: 17, fontWeight: "bold", marginTop: 20 }}>
             Login to Your Account
           </Text>
         </View>
+
         <View style={{ marginTop: 40 }}>
           <View
             style={{
@@ -67,7 +87,7 @@ const LoginScreen = () => {
                 color: "gray",
                 marginVertical: 6,
                 width: 300,
-                fontSize: email ? 16 : 16,
+                fontSize: 16,
               }}
               placeholder="Enter your Email"
             />
@@ -102,7 +122,7 @@ const LoginScreen = () => {
                 color: "gray",
                 marginVertical: 6,
                 width: 300,
-                fontSize: password ? 16 : 16,
+                fontSize: 16,
               }}
               placeholder="Enter your Password"
             />
@@ -118,13 +138,14 @@ const LoginScreen = () => {
           }}
         >
           <Text>Keep me logged in</Text>
-          <Text style={{ fontWeight: 500, color: "#007FFF" }}>
+          <Text style={{ fontWeight: "500", color: "#007FFF" }}>
             Forgot Password
           </Text>
         </View>
 
         <View style={{ marginTop: 45 }} />
         <TouchableOpacity
+          onPress={handleLogin}
           activeOpacity={0.8}
           style={{
             width: 200,
