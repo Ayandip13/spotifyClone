@@ -7,8 +7,14 @@ const nodemailer = require("nodemailer");
 const app = express();
 const PORT = 3000;
 const cors = require("cors");
-app.use(cors());
-
+// app.use(cors());
+app.use(
+  cors({
+    origin: "*", // or specify your React Native app's origin
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 const jwt = require("jsonwebtoken");
@@ -89,7 +95,7 @@ const sendverificationEmail = async (email, verificationToken) => {
     from: "threads.com",
     to: email,
     subject: "Email Verification",
-    text: `Please click the following link to verify the email http://localhost:3000/verify/${verificationToken}`,
+    text: `Please click the following link to verify the email http://192.168.0.103:3000/verify/${verificationToken}`,
   };
 
   //now send the email
@@ -111,7 +117,7 @@ app.get("/verify/:token", async (req, res) => {
     }
 
     user.verified = true; //cause the `verified` was false in default case and we'll marked as true after user click on that link
-    user.verificationToken = undefined; //because we don't  need that anymore
+    user.verificationToken = undefined; //because we don't need that anymore
     await user.save();
 
     res.status(200).json({ message: "Email verification successfull" });
@@ -138,8 +144,10 @@ app.post("/login", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+
     // check password
     if (user.password !== password) {
+      console.log("Passwords DO NOT MATCH!"); // Add this
       return res.status(401).json({ message: "Invalid password" });
     }
 
@@ -153,7 +161,7 @@ app.post("/login", async (req, res) => {
     const token = jwt.sign({ userId: user._id }, secretKey);
     res.status(200).json({ token });
   } catch (error) {
-    console.log("Login error:", error);
-    res.status(500).json({ message: "Login failed" });
+    console.log("Detailed login error:", error.message, error.stack);
+    res.status(500).json({ message: "Login failed", error: error.message });
   }
 });
