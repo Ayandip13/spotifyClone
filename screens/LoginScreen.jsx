@@ -10,7 +10,7 @@ import {
   Pressable,
   Alert,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
@@ -20,6 +20,23 @@ const LoginScreen = () => {
   const [secureText, setSecureText] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        if (token) {
+          setTimeout(() => {
+            navigation.replace("Main");
+          }, 10);
+        }
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
 
   const navigation = useNavigation();
 
